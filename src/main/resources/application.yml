@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: mcp-demo
+  ai:
+    mcp:
+      server:
+        capabilities:
+          tool: true
+        annotation-scanner:
+          enabled: true
+        type: sync
+        enabled: false
+server:
+  port: 8080
+
