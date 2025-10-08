@@ -3,7 +3,7 @@ package com.example.mcp.config;
 import com.example.mcp.annotation.PlanningMcpServer;
 import io.modelcontextprotocol.server.McpServer;
 import io.modelcontextprotocol.server.McpSyncServer;
-import io.modelcontextprotocol.server.transport.WebMvcSseServerTransportProvider;
+import io.modelcontextprotocol.server.transport.WebMvcStreamableServerTransportProvider;
 import io.modelcontextprotocol.spec.McpSchema;
 import org.springframework.ai.mcp.McpToolUtils;
 import org.springframework.ai.support.ToolCallbacks;
@@ -20,7 +20,7 @@ import java.util.List;
 @Configuration
 public class McpServerConfig implements BeanFactoryPostProcessor {
 
-    private final List<WebMvcSseServerTransportProvider> providers = new ArrayList<>();
+    private final List<WebMvcStreamableServerTransportProvider> providers = new ArrayList<>();
 
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
@@ -32,9 +32,8 @@ public class McpServerConfig implements BeanFactoryPostProcessor {
                 PlanningMcpServer annotation = type.getAnnotation(PlanningMcpServer.class);
 
                 // Transport provider
-                WebMvcSseServerTransportProvider provider = WebMvcSseServerTransportProvider.builder()
-                        .sseEndpoint(annotation.endpoint())
-                        .messageEndpoint(annotation.endpoint())
+                WebMvcStreamableServerTransportProvider provider = WebMvcStreamableServerTransportProvider.builder()
+                        .mcpEndpoint(annotation.endpoint())
                         .build();
 
                 // Underlying service bean (WeatherService, StockService, etc.)
@@ -59,7 +58,7 @@ public class McpServerConfig implements BeanFactoryPostProcessor {
     @Bean
     public RouterFunction<?> mcpRouterFunction() {
         return providers.stream()
-                .map(WebMvcSseServerTransportProvider::getRouterFunction)
+                .map(WebMvcStreamableServerTransportProvider::getRouterFunction)
                 .reduce(RouterFunction::and)
                 .orElse(request -> null);
     }
