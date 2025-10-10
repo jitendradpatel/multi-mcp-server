@@ -1,5 +1,6 @@
 package com.exmple.mcp.test;
 
+import com.example.mcp.jwe.JweUtils;
 import io.modelcontextprotocol.client.McpClient;
 import io.modelcontextprotocol.client.McpSyncClient;
 import io.modelcontextprotocol.client.transport.HttpClientStreamableHttpTransport;
@@ -7,19 +8,21 @@ import io.modelcontextprotocol.spec.McpSchema;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 public class StockServiceTest {
 
-    private static final String BEARER_TOKEN = "xxxxx";
     private static McpSyncClient mcpSyncClient;
     private static final String BASE_URL = "http://localhost:8080";
     private static final String ENDPOINT = "stock";
 
     @BeforeAll
-    public static void setup() {
+    public static void setup() throws Exception {
+        String jwtToken = JweUtils.getInstance().generateEncryptedToken("user", "user@example.com", List.of("user"), 3600);
         mcpSyncClient = McpClient.sync(HttpClientStreamableHttpTransport.builder(BASE_URL)
                 .endpoint(ENDPOINT)
                 .httpRequestCustomizer((builder, uri, method, body, headers) ->
-                        builder.header("Authorization", "Bearer " + BEARER_TOKEN)
+                        builder.header("Authorization", "Bearer " + jwtToken)
                 )
                 .build()
         ).build();
